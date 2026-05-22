@@ -22,7 +22,10 @@ jobs:
 
       - name: Build backend despacho
         run: |
-          docker build -t danielx1/backend-despacho:v1 ./back-Despachos_SpringBoot
+          docker build \
+          -t danielx1/backend-despacho:v1 \
+          -f ./back-Despachos_SpringBoot/Dockerfile \
+          ./back-Despachos_SpringBoot
 
       - name: Push backend despacho
         run: |
@@ -44,7 +47,10 @@ jobs:
 
       - name: Build backend ventas
         run: |
-          docker build -t danielx1/backend-ventas:v1 ./back-Ventas_SpringBoot
+          docker build \
+          -t danielx1/backend-ventas:v1 \
+          -f ./back-Ventas_SpringBoot/Dockerfile \
+          ./back-Ventas_SpringBoot
 
       - name: Push backend ventas
         run: |
@@ -66,7 +72,9 @@ jobs:
 
       - name: Build frontend
         run: |
-          docker build -t danielx1/frontend-despacho:v1 ./front_despacho
+          docker build \
+          -t danielx1/frontend-despacho:v1 \
+          ./front_despacho
 
       - name: Push frontend
         run: |
@@ -94,5 +102,7 @@ jobs:
             cd /home/ubuntu/ISY1101_EP2_Proyecto_Semestral
 
             sudo docker compose pull
+
+            sudo docker compose down
 
             sudo docker compose up -d
