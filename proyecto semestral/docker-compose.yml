@@ -1,0 +1,96 @@
+version: '3.8'
+services:
+  # BASE DE DATOS: MySQL con persistencia y usuario seguro
+  mysql-db:
+    image: mysql:8.0
+    container_name: innovatech-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: RootSecurePassword123!
+      MYSQL_DATABASE: innovatech_db
+      # Creación de usuario sin privilegios root para cumplir con seguridad
+      MYSQL_USER: innovatech_user
+      MYSQL_PASSWORD: UserPassword123!
+    ports:
+      - "3306:3306"
+    volumes:
+      # IE3: Uso de Named Volume para asegurar la persistencia de datos
+      - mysql_data:/var/lib/mysql
+    networks:
+      - back-network
+    # Garantiza que el contenedor esté realmente listo antes de que el Back intente entrar
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  # BACKEND: MICROSERVICIO DE VENTAS (Mapeado a tu carpeta real)
+  backend-ventas:
+    image: danielx1/backend-ventas:v1
+    #build:
+      #context: ./back-Ventas_SpringBoot
+      #dockerfile: Dockerfile
+    container_name: backend-ventas-service
+    restart: always
+    environment:
+      - DB_ENDPOINT=mysql-db
+      - DB_PORT=3306
+      - DB_NAME=innovatech_db
+      - DB_USERNAME=innovatech_user
+      - DB_PASSWORD=UserPassword123!
+    ports:
+      - "8080:8080"
+    networks:
+      - back-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+  # BACKEND: MICROSERVICIO DE DESPACHOS (Mapeado a tu carpeta real)
+  backend-despacho:
+    image: danielx1/backend-despacho:v1
+    #build:
+      #context: ./back-Despachos_SpringBoot
+      #dockerfile: Dockerfile
+    container_name: backend-despacho-service
+    restart: always
+    environment:
+      - DB_ENDPOINT=mysql-db
+      - DB_PORT=3306
+      - DB_NAME=innovatech_db
+      - DB_USERNAME=innovatech_user
+      - DB_PASSWORD=UserPassword123!
+    ports:
+      - "8081:8081"
+    networks:
+      - back-network
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+  # FRONTEND: APLICACIÓN WEB REACT (Mapeado a tu carpeta real)
+  frontend:
+    image: danielx1/frontend-despacho:v1
+    #build:
+      #context: ./front_despacho
+      #dockerfile: Dockerfile
+    container_name: frontend-react-app
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - front-network
+      - back-network
+    depends_on:
+      - backend-ventas
+      - backend-despacho
+
+# PERSISTENCIA Y AISLAMIENTO DE REDES (Rúbrica IE2 / IE3)
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  front-network:
+    driver: bridge
+  back-network:
+    driver: bridge
