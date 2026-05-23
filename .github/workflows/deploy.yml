@@ -6,10 +6,8 @@ on:
       - main
 
 jobs:
-
   backend-despacho:
     runs-on: self-hosted
-
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
@@ -22,16 +20,14 @@ jobs:
 
       - name: Build backend despacho
         run: |
-          docker build -t danielx1/backend-despacho:v1 ./back-Despachos_SpringBoot
+          docker build -t danielx1/backend-despacho:v1 "./proyecto semestral/back-Despachos_SpringBoot"
 
       - name: Push backend despacho
         run: |
           docker push danielx1/backend-despacho:v1
 
-
   backend-ventas:
     runs-on: self-hosted
-
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
@@ -44,16 +40,14 @@ jobs:
 
       - name: Build backend ventas
         run: |
-          docker build -t danielx1/backend-ventas:v1 ./back-Ventas_SpringBoot
+          docker build -t danielx1/backend-ventas:v1 "./proyecto semestral/back-Ventas_SpringBoot"
 
       - name: Push backend ventas
         run: |
           docker push danielx1/backend-ventas:v1
 
-
   frontend:
     runs-on: self-hosted
-
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
@@ -66,39 +60,32 @@ jobs:
 
       - name: Build frontend
         run: |
-          docker build -t danielx1/frontend-despacho:v1 ./front_despacho
+          docker build -t danielx1/frontend-despacho:v1 "./proyecto semestral/front_despacho"
 
       - name: Push frontend
         run: |
           docker push danielx1/frontend-despacho:v1
 
-
   deploy-ec2:
     runs-on: self-hosted
-
     needs:
       - backend-despacho
       - backend-ventas
       - frontend
-
     steps:
       - name: Desplegar en AWS EC2
         uses: appleboy/ssh-action@v0.1.10
-
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-
           script: |
-            # 1. Crear la carpeta si no existe y entrar en ella
             mkdir -p /home/ubuntu/ISY1101_EP2_Proyecto_Semestral
             cd /home/ubuntu/ISY1101_EP2_Proyecto_Semestral
             
-            # 2. Descargar el archivo docker-compose.yml directamente desde tu GitHub (rama deploy)
-            wget -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/deploy/docker-compose.yml
+            # Descarga el docker-compose desde la raíz de la rama main
+            wget -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/proyecto%20semestral/docker-compose.yml
             
-            # 3. Descargar las nuevas imágenes y levantar los contenedores
             sudo docker compose pull
-            sudo docker compose down # Apaga la versión anterior por si acaso
+            sudo docker compose down
             sudo docker compose up -d
