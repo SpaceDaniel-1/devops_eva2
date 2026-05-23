@@ -79,13 +79,19 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 10m  # Le da hasta 10 minutos de gracia al SSH
           script: |
             mkdir -p /home/ubuntu/ISY1101_EP2_Proyecto_Semestral
             cd /home/ubuntu/ISY1101_EP2_Proyecto_Semestral
             
-            # Descarga el docker-compose desde la raíz de la rama main
+            # Descarga el docker-compose actualizado
             wget -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/proyecto%20semestral/docker-compose.yml
             
+            # Forzamos la descarga de las imágenes frescas
             sudo docker compose pull
-            sudo docker compose down
-            sudo docker compose up -d
+            
+            # Apagamos lo anterior limpiando huellas viejas
+            sudo docker compose down --remove-orphans
+            
+            # Levantamos en segundo plano (-d) de forma limpia
+            sudo docker compose up -d --force-recreate
