@@ -91,8 +91,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
 
           script: |
+            # 1. Crear la carpeta si no existe y entrar en ella
+            mkdir -p /home/ubuntu/ISY1101_EP2_Proyecto_Semestral
             cd /home/ubuntu/ISY1101_EP2_Proyecto_Semestral
-
+            
+            # 2. Descargar el archivo docker-compose.yml directamente desde tu GitHub (rama deploy)
+            wget -O docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/deploy/docker-compose.yml
+            
+            # 3. Descargar las nuevas imágenes y levantar los contenedores
             sudo docker compose pull
-
+            sudo docker compose down # Apaga la versión anterior por si acaso
             sudo docker compose up -d
