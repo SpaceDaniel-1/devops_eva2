@@ -2,17 +2,14 @@ version: '3.8'
 
 services:
 
-  # BASE DE DATOS: MySQL con persistencia y usuario seguro
   mysql-db:
     image: mysql:8.0
     container_name: innovatech-mysql
-    restart: always
+    restart: unless-stopped
 
     environment:
       MYSQL_ROOT_PASSWORD: RootSecurePassword123!
       MYSQL_DATABASE: innovatech_db
-
-      # Usuario no root
       MYSQL_USER: innovatech_user
       MYSQL_PASSWORD: UserPassword123!
 
@@ -20,13 +17,11 @@ services:
       - "3306:3306"
 
     volumes:
-      # Persistencia con named volume
       - mysql_data:/var/lib/mysql
 
     networks:
       - back-network
 
-    # Espera real antes de iniciar backend
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -34,23 +29,17 @@ services:
       retries: 5
 
 
-  # BACKEND VENTAS
   backend-ventas:
     image: danielx1/backend-ventas:v1
-
-    #build:
-    #  context: ./back-Ventas_SpringBoot
-    #  dockerfile: Dockerfile
-
     container_name: backend-ventas-service
-    restart: always
+    restart: unless-stopped
 
     environment:
-      - DB_ENDPOINT=mysql-db
-      - DB_PORT=3306
-      - DB_NAME=innovatech_db
-      - DB_USERNAME=innovatech_user
-      - DB_PASSWORD=UserPassword123!
+      DB_ENDPOINT: mysql-db
+      DB_PORT: 3306
+      DB_NAME: innovatech_db
+      DB_USERNAME: innovatech_user
+      DB_PASSWORD: UserPassword123!
 
     ports:
       - "8080:8080"
@@ -63,23 +52,17 @@ services:
         condition: service_healthy
 
 
-  # BACKEND DESPACHO
   backend-despacho:
     image: danielx1/backend-despacho:v1
-
-    #build:
-    #  context: ./back-Despachos_SpringBoot
-    #  dockerfile: Dockerfile
-
     container_name: backend-despacho-service
-    restart: always
+    restart: unless-stopped
 
     environment:
-      - DB_ENDPOINT=mysql-db
-      - DB_PORT=3306
-      - DB_NAME=innovatech_db
-      - DB_USERNAME=innovatech_user
-      - DB_PASSWORD=UserPassword123!
+      DB_ENDPOINT: mysql-db
+      DB_PORT: 3306
+      DB_NAME: innovatech_db
+      DB_USERNAME: innovatech_user
+      DB_PASSWORD: UserPassword123!
 
     ports:
       - "8081:8081"
@@ -92,16 +75,10 @@ services:
         condition: service_healthy
 
 
-  # FRONTEND REACT
   frontend:
     image: danielx1/frontend-despacho:v1
-
-    #build:
-    #  context: ./front_despacho
-    #  dockerfile: Dockerfile
-
     container_name: frontend-react-app
-    restart: always
+    restart: unless-stopped
 
     ports:
       - "80:8080"
@@ -115,16 +92,10 @@ services:
       - backend-despacho
 
 
-# PERSISTENCIA
 volumes:
   mysql_data:
-    driver: local
 
 
-# REDES
 networks:
   front-network:
-    driver: bridge
-
   back-network:
-    driver: bridge
