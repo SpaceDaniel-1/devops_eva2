@@ -8,7 +8,7 @@ on:
 jobs:
 
   backend-despacho:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Descargar repositorio
@@ -30,7 +30,7 @@ jobs:
 
 
   backend-ventas:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Descargar repositorio
@@ -52,7 +52,7 @@ jobs:
 
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Descargar repositorio
@@ -74,7 +74,7 @@ jobs:
 
 
   deploy-ec2:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     needs:
       - backend-despacho
